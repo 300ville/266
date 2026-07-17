@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Section 266 Interest Recovery Calculator</title>
+
+<style>
+:root{
+  --black:#0b1f33;
+  --ink:#102033;
+  --muted:#536579;
+  --line:#d6e1ed;
+  --paper:#ffffff;
+  --off:#f5f8fc;
+  --accent:#0f6b8f;
+  --accent-soft:#eaf6fb;
+  --shadow:0 16px 38px rgba(11,31,51,.075);
+  --serif:Garamond,"EB Garamond",Georgia,serif;
+  --sans:Arial,Helvetica,sans-serif;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:15px;line-height:1.45}
+
+button{border:1px solid var(--black);border-radius:999px;background:var(--black);color:#fff;padding:8px 13px;font-family:var(--sans);font-size:12.5px;font-weight:700;cursor:pointer}
+button:hover{filter:brightness(.97)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible{outline:2px solid rgba(15,107,143,.34);outline-offset:2px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.secondary{background:var(--paper);color:var(--black)}
+.hidden{display:none!important}
+
+.app-header{display:none;padding:13px 22px 11px;border-bottom:3px solid var(--accent);background:linear-gradient(180deg,#fff 0%,var(--off) 100%);align-items:center;justify-content:space-between;gap:16px}
+.app-header.active{display:flex}
+.app-header h1{margin:0;font-size:23px;line-height:1.05;letter-spacing:.04em;color:var(--black)}
+.subhead{margin:5px 0 0;color:var(--muted);font-size:14px}
+.app-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.app-tools button{padding:7px 11px;font-size:11px}
+
+.foyer{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px;background:var(--paper)}
+.foyer-card{width:min(860px,100%);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);background:var(--paper);overflow:hidden;position:relative}
+.acronym-top{position:absolute;top:14px;right:18px;font-family:var(--sans);font-size:9.5px;font-weight:700;letter-spacing:.045em;text-transform:uppercase;color:var(--muted);opacity:.8;white-space:nowrap;text-align:right}
+.foyer-screen{padding:54px 48px 46px;text-align:center}
+.hello h2{margin:18px 0 0;font-size:38px;line-height:1.05;letter-spacing:.04em;color:var(--black)}
+.nto-line{margin:7px 0 0;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.foyer-options{display:flex;justify-content:center;align-items:center;gap:14px;margin-top:28px}
+.foyer-link{border:0;border-radius:0;background:transparent;color:var(--black);padding:0;font-family:var(--sans);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.foyer-divider{width:1px;height:18px;background:var(--line)}
+.how-to-row{margin-top:28px;padding-top:14px;border-top:1px solid var(--line)}
+.how-to-row button{padding:7px 13px;font-size:11px}
+.copy{margin:0 auto;max-width:720px;text-align:left;border-top:3px solid var(--accent);padding-top:18px}
+.copy h3{margin:0 0 8px;font-size:23px;color:var(--black)}
+.copy p{margin:0 0 10px;color:var(--muted);font-size:15px;line-height:1.45}
+.copy a{color:var(--accent);font-weight:700;text-decoration:none}
+.copy a:hover{text-decoration:underline}
+.copy ol{margin:12px 0 0;padding-left:22px;color:var(--ink)}
+.copy li{padding-left:4px}
+.copy li+li{margin-top:9px}
+.bottom{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+
+.app{display:none}
+.app.active{display:block}
+.wrap{width:min(1120px,calc(100vw - 36px));margin:0 auto;padding:22px 0 42px}
+.calculator-card{background:var(--paper);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);overflow:hidden}
+.tool-intro{padding:22px 24px;border-bottom:1px solid var(--line);background:var(--off)}
+.tool-intro h2{margin:0 0 8px;font-size:24px;color:var(--black)}
+.tool-intro p{margin:0;max-width:850px;color:var(--muted);font-size:15px;line-height:1.45}
+.content{padding:24px;display:grid;gap:20px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.field{min-width:0}
+label{display:block;margin:0 0 7px;font-family:var(--sans);font-size:12px;font-weight:700;line-height:1.4;color:#2b2b2b}
+label small{display:block;margin-top:4px;color:var(--muted);font-family:var(--serif);font-size:13px;font-weight:400;font-style:normal}
+input{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 10px;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:15px;line-height:1.35;outline:none;text-align:right;font-variant-numeric:tabular-nums}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(15,107,143,.12)}
+.actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center;padding-top:2px}
+.pill{padding:8px 12px;border-radius:999px;font-family:var(--sans);font-size:11px;font-weight:700;border:1px solid var(--line);background:var(--off);color:var(--muted)}
+.pill strong{color:var(--black);margin-left:3px}
+.results-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.panel{background:var(--off);border:1px solid var(--line);border-radius:10px;padding:16px}
+.row{display:flex;justify-content:space-between;gap:20px;padding:7px 0;font-variant-numeric:tabular-nums}
+.row span:first-child{color:var(--muted)}
+.row strong,.row span:last-child{text-align:right;white-space:nowrap;color:var(--black)}
+.row+.row{border-top:1px solid var(--line)}
+.big{font-weight:700;font-size:17px}
+.big span{color:var(--accent)!important}
+.disclaimer-overlay{position:fixed;inset:0;background:rgba(11,31,51,.52);z-index:50;display:flex;align-items:center;justify-content:center;padding:24px}
+.disclaimer-box{width:min(760px,100%);max-height:calc(100vh - 48px);overflow:auto;background:var(--paper);border:2px solid var(--black);border-radius:14px;box-shadow:0 24px 80px rgba(0,0,0,.24);padding:26px;text-align:left}
+.disclaimer-box h2{margin:0 0 8px;font-size:28px;line-height:1.1;color:var(--black)}
+.disclaimer-box p{margin:0 0 12px;color:var(--muted);font-size:15px;line-height:1.45}
+.disclaimer-box p strong{color:var(--black)}
+.disclaimer-check{display:flex;gap:10px;align-items:flex-start;margin:16px 0 6px;padding:13px;border:1px solid var(--line);border-radius:10px;background:var(--off)}
+.disclaimer-check input{width:auto;margin:3px 0 0;flex:0 0 auto;text-align:left}
+.disclaimer-check label{margin:0;font-family:var(--sans);font-size:13px;font-weight:700;line-height:1.4;color:var(--ink)}
+body.app-blurred .app-header.active,body.app-blurred .app.active{filter:blur(3px);pointer-events:none;user-select:none}
+
+@media(max-width:760px){
+  .app-header.active{display:block}
+  .app-tools{justify-content:flex-start;margin-top:10px}
+  .grid,.results-grid{grid-template-columns:1fr}
+  .wrap{width:min(100vw - 24px,1120px)}
+}
+
+@media(max-width:680px){
+  .foyer{padding:14px}
+  .foyer-screen{padding:52px 22px 30px}
+  .acronym-top{left:18px;right:18px;white-space:normal}
+  .hello h2{font-size:31px}
+  .content,.tool-intro{padding:18px}
+  .bottom{align-items:stretch;flex-direction:column-reverse}
+  .bottom button{width:100%}
+  .row{display:grid;gap:4px}
+  .row strong,.row span:last-child{text-align:left}
+}
+
+@media print{
+  .app-header,.foyer,.disclaimer-overlay,.actions{display:none!important}
+  .app,.app.active{display:block!important}
+  .wrap{width:100%;padding:0}
+  .calculator-card{box-shadow:none}
+}
+</style>
+</head>
+
+<body>
+<header class="app-header" id="appHeader">
+  <div>
+    <h1>Section 266 Interest Recovery Calculator</h1>
+    <p class="subhead">Inventory and Fixed Asset Interest Allocation Estimator</p>
+  </div>
+  <div class="app-tools">
+    <button class="secondary" type="button" onclick="returnToHowTo()">How to use</button>
+    <button class="secondary" type="button" onclick="returnToIntro()">Exit</button>
+  </div>
+</header>
+
+<section class="foyer" id="foyer">
+  <div class="foyer-card">
+    <div class="acronym-top">Eisner Advisory Group LLC · National Tax Office · Accounting Methods &amp; Periods</div>
+
+    <div class="foyer-screen" id="introScreen">
+      <div class="hello">
+        <h2>Section 266 Interest Recovery Calculator</h2>
+        <p class="nto-line">Inventory and Fixed Asset Interest Allocation Estimator</p>
+      </div>
+      <div class="foyer-options">
+        <button class="foyer-link" type="button" onclick="showBackground()">Background</button>
+        <span class="foyer-divider" aria-hidden="true"></span>
+        <button class="foyer-link" type="button" onclick="enterApp()">Get started</button>
+      </div>
+      <div class="how-to-row">
+        <button class="secondary" type="button" onclick="showHowTo()">How to use</button>
+      </div>
+    </div>
+
+    <div class="foyer-screen hidden" id="backgroundScreen">
+      <div class="copy">
+        <h3>Background</h3>
+        <p>The Section 266 Interest Recovery Calculator estimates interest potentially allocable to inventory and fixed assets using average annual debt, interest expense, and expenditure data.</p>
+        <p>The tool calculates the weighted average interest rate, estimated interest allocable to inventory and fixed assets, and the portion of inventory interest allocated to ending inventory and cost of goods sold.</p>
+        <p>This is a preliminary estimator. Actual results depend on the taxpayer’s facts, documentation, capitalization methodology, and applicable limitations, including Section 163(j).</p>
+        <p>Developed by <a href="mailto:Jeffrey.kelson@eisneramper.com">Jeffrey Kelson</a>, <a href="mailto:stanley.barsky@eisneramper.com">Stanley Barsky</a>, <a href="mailto:Ben.white@eisneramper.com">Ben White</a>, and <a href="mailto:Jaime.garciadeparedes@eisneramper.com">Jaime Garcia de Paredes</a>.</p>
+      </div>
+      <div class="bottom">
+        <button class="secondary" type="button" onclick="showIntro()">Back</button>
+        <button class="primary" type="button" onclick="enterApp()">Continue</button>
+      </div>
+    </div>
+
+    <div class="foyer-screen hidden" id="howToScreen">
+      <div class="copy">
+        <h3>How to use</h3>
+        <ol>
+          <li>Enter the average annual debt balance and total annual interest expense.</li>
+          <li>Enter the average annual direct and indirect inventory expenditures and fixed asset expenditures.</li>
+          <li>Enter the portion of inventory remaining at year end as a decimal, such as 0.25 for 25 percent.</li>
+          <li>Select Calculate, review the results, and use Copy Results if needed.</li>
+        </ol>
+      </div>
+      <div class="bottom">
+        <button class="secondary" type="button" onclick="showIntro()">Back</button>
+        <button class="primary" type="button" onclick="enterApp()">Get started</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="app" id="app">
+  <div class="wrap">
+    <section class="calculator-card">
+      <div class="tool-intro">
+        <h2>Interest Reallocation to Inventory and Fixed Assets</h2>
+        <p>Estimate the interest that may be accelerated into the 2025 tax year using a Section 266 allocation to inventory and fixed assets.</p>
+      </div>
+
+      <div class="content">
+        <div class="grid">
+          <div class="field">
+            <label for="avgDebt">Average annual debt balance (monthly or quarterly averages)</label>
+            <input id="avgDebt" value="40,000,000">
+          </div>
+
+          <div class="field">
+            <label for="totInt">Total annual interest expense</label>
+            <input id="totInt" value="3,020,000">
+          </div>
+
+          <div class="field">
+            <label for="avgInvEx">Average annual direct and indirect inventory expenditures (monthly or quarterly averages)</label>
+            <input id="avgInvEx" value="35,670,000">
+          </div>
+
+          <div class="field">
+            <label for="avgFAEx">Average annual fixed asset expenditures (monthly or quarterly averages)</label>
+            <input id="avgFAEx" value="304,000">
+          </div>
+
+          <div class="field">
+            <label for="endRatio">
+              Percentage of inventory remaining at year end
+              <small>Enter the percentage as a decimal. Not sure? This is typically 15 percent to 30 percent.</small>
+            </label>
+            <input id="endRatio" value="0.54">
+          </div>
+        </div>
+
+        <div class="actions">
+          <span class="pill">Weighted Average Interest Rate (WAIR): <strong id="wair">—</strong></span>
+          <button class="secondary" id="reset" type="button">Reset</button>
+          <button class="primary" id="calculate" type="button" disabled>Calculate</button>
+          <button class="secondary" id="copyResults" type="button" disabled>Copy Results</button>
+        </div>
+
+        <div id="results" class="results-grid hidden">
+          <div class="panel">
+            <div class="row"><span>Inventory capitalizable interest</span><strong id="capInv">$0</strong></div>
+            <div class="row"><span>Fixed assets capitalizable interest</span><strong id="capFA">$0</strong></div>
+            <div class="row big"><span>Total Section 266 interest</span><span id="totCap">$0</span></div>
+          </div>
+
+          <div class="panel">
+            <div class="row"><span>Allocated to ending inventory</span><strong id="toEnd">$0</strong></div>
+            <div class="row"><span>Allocated to COGS</span><strong id="toCogs">$0</strong></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+</main>
+
+<div id="disclaimerOverlay" class="disclaimer-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="disclaimerTitle" aria-describedby="disclaimerDesc">
+  <div class="disclaimer-box">
+    <h2 id="disclaimerTitle">Notice and Disclaimer</h2>
+    <div id="disclaimerDesc">
+      <p><strong>CONFIDENTIAL AND PROPRIETARY.</strong> The Section 266 Interest Recovery Calculator is intended only for authorized use.</p>
+      <p>This tool provides a rough, directional estimate based solely on the information entered by the user. It is not a precise or audit-ready calculation and is not tax, legal, accounting, penalty-protection, transaction, or other professional advice.</p>
+      <p>Results rely on averaged inputs and simplified assumptions. Actual results depend on the taxpayer’s facts, documentation, capitalization methodology, and applicable limitations, including Section 163(j).</p>
+      <p>The user must review all inputs, assumptions, eligibility requirements, limitations, and computations before use or reliance.</p>
+    </div>
+    <div class="disclaimer-check">
+      <input id="disclaimerCheck" type="checkbox" onchange="toggleDisclaimerAccept()">
+      <label for="disclaimerCheck">I understand that the Section 266 Interest Recovery Calculator is a preliminary estimator and all results require professional review.</label>
+    </div>
+    <div class="bottom">
+      <button class="secondary" type="button" onclick="returnToIntro()">Back</button>
+      <button id="disclaimerAccept" class="primary" type="button" onclick="acceptDisclaimer()" disabled>Agree and continue</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const defaults = {
+  avgDebt: "40,000,000",
+  totInt: "3,020,000",
+  avgInvEx: "35,670,000",
+  avgFAEx: "304,000",
+  endRatio: "0.54"
+};
+
+const foyer = $("foyer");
+const introScreen = $("introScreen");
+const backgroundScreen = $("backgroundScreen");
+const howToScreen = $("howToScreen");
+const appHeader = $("appHeader");
+const app = $("app");
+const disclaimerOverlay = $("disclaimerOverlay");
+const disclaimerCheck = $("disclaimerCheck");
+const disclaimerAccept = $("disclaimerAccept");
+let priorFocus = null;
+
+function showIntro(){
+  introScreen.classList.remove("hidden");
+  backgroundScreen.classList.add("hidden");
+  howToScreen.classList.add("hidden");
+}
+
+function showBackground(){
+  introScreen.classList.add("hidden");
+  backgroundScreen.classList.remove("hidden");
+  howToScreen.classList.add("hidden");
+}
+
+function showHowTo(){
+  introScreen.classList.add("hidden");
+  backgroundScreen.classList.add("hidden");
+  howToScreen.classList.remove("hidden");
+}
+
+function enterApp(){
+  foyer.classList.add("hidden");
+  appHeader.classList.add("active");
+  app.classList.add("active");
+  showDisclaimer();
+  window.scrollTo({top:0,behavior:"auto"});
+}
+
+function returnToIntro(){
+  hideDisclaimer();
+  appHeader.classList.remove("active");
+  app.classList.remove("active");
+  foyer.classList.remove("hidden");
+  showIntro();
+  window.scrollTo({top:0,behavior:"auto"});
+}
+
+function returnToHowTo(){
+  hideDisclaimer();
+  appHeader.classList.remove("active");
+  app.classList.remove("active");
+  foyer.classList.remove("hidden");
+  showHowTo();
+  window.scrollTo({top:0,behavior:"auto"});
+}
+
+function showDisclaimer(){
+  priorFocus = document.activeElement;
+  disclaimerOverlay.classList.remove("hidden");
+  document.body.classList.add("app-blurred");
+  disclaimerCheck.checked = false;
+  $("calculate").disabled = true;
+  toggleDisclaimerAccept();
+  document.addEventListener("keydown",handleDialogKeydown);
+  setTimeout(() => disclaimerCheck.focus(),0);
+}
+
+function hideDisclaimer(){
+  disclaimerOverlay.classList.add("hidden");
+  document.body.classList.remove("app-blurred");
+  document.removeEventListener("keydown",handleDialogKeydown);
+  if(priorFocus && typeof priorFocus.focus === "function") priorFocus.focus();
+}
+
+function handleDialogKeydown(event){
+  if(disclaimerOverlay.classList.contains("hidden")) return;
+  if(event.key === "Escape"){
+    event.preventDefault();
+    returnToIntro();
+    return;
+  }
+  if(event.key !== "Tab") return;
+
+  const focusables = Array.from(
+    disclaimerOverlay.querySelectorAll('button,input,[href],[tabindex]:not([tabindex="-1"])')
+  ).filter(element => !element.disabled && element.offsetParent !== null);
+  if(!focusables.length) return;
+
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  if(event.shiftKey && document.activeElement === first){
+    event.preventDefault();
+    last.focus();
+  }else if(!event.shiftKey && document.activeElement === last){
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+function toggleDisclaimerAccept(){
+  disclaimerAccept.disabled = !disclaimerCheck.checked;
+}
+
+function acceptDisclaimer(){
+  $("calculate").disabled = false;
+  hideDisclaimer();
+}
+
+function parseCurrency(v){
+  return parseFloat(String(v).replace(/[^0-9.-]/g,'')) || 0;
+}
+
+function money(n){
+  return new Intl.NumberFormat('en-US',{style:"currency",currency:"USD",maximumFractionDigits:0}).format(n||0);
+}
+
+function pct(n){
+  return new Intl.NumberFormat('en-US',{style:"percent",minimumFractionDigits:2,maximumFractionDigits:2}).format(n||0);
+}
+
+function compute(){
+  const avgDebt = parseCurrency($("avgDebt").value);
+  const totInt  = parseCurrency($("totInt").value);
+  const avgInvEx= parseCurrency($("avgInvEx").value);
+  const avgFAEx = parseCurrency($("avgFAEx").value);
+  const endRatio= parseFloat($("endRatio").value) || 0;
+
+  const wair   = avgDebt !== 0 ? (totInt / avgDebt) : 0;
+  const capInv = avgInvEx * wair;
+  const capFA  = avgFAEx * wair;
+  const totCap = capInv + capFA;
+
+  const toEnd  = capInv * endRatio;
+  const toCogs = capInv - toEnd;
+
+  $("wair").textContent   = pct(wair);
+  $("capInv").textContent = money(capInv);
+  $("capFA").textContent  = money(capFA);
+  $("totCap").textContent = money(totCap);
+  $("toEnd").textContent  = money(toEnd);
+  $("toCogs").textContent = money(toCogs);
+
+  $("results").classList.remove("hidden");
+  $("copyResults").disabled = false;
+}
+
+function copyResults(){
+  const lines = [
+    `Weighted Average Interest Rate (WAIR): ${$("wair").textContent}`,
+    `Inventory capitalizable interest: ${$("capInv").textContent}`,
+    `Fixed assets capitalizable interest: ${$("capFA").textContent}`,
+    `Total Section 266 interest: ${$("totCap").textContent}`,
+    `Allocated to ending inventory: ${$("toEnd").textContent}`,
+    `Allocated to COGS: ${$("toCogs").textContent}`
+  ];
+  const text = lines.join("\n");
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = $("copyResults");
+    const old = btn.textContent;
+    btn.textContent = "Copied";
+    setTimeout(() => btn.textContent = old, 1200);
+  });
+}
+
+$("calculate").addEventListener("click", compute);
+
+$("reset").addEventListener("click", () => {
+  Object.entries(defaults).forEach(([k,v]) => $(k).value = v);
+  $("results").classList.add("hidden");
+  $("copyResults").disabled = true;
+  $("wair").textContent = "—";
+});
+
+$("copyResults").addEventListener("click", copyResults);
+</script>
+
+</body>
+</html>
